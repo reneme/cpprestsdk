@@ -468,6 +468,14 @@ public:
     _ASYNCRTIMP const uri& base_uri() const;
 
     /// <summary>
+    /// Gets the web proxy actually in use.
+    /// </summary>
+    /// <returns>
+    /// A web_proxy object describing the actually used web proxy
+    /// </returns>
+    _ASYNCRTIMP web_proxy proxy() const;
+
+    /// <summary>
     /// Get client configuration object
     /// </summary>
     /// <returns>A reference to the client configuration object.</returns>

@@ -114,6 +114,8 @@ public:
 
     const uri & base_uri() const;
 
+    virtual web_proxy proxy() const;
+
 protected:
     _http_client_communicator(http::uri&& address, http_client_config&& client_config);
 

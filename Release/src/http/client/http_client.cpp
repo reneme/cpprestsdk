@@ -196,6 +196,11 @@ const uri & _http_client_communicator::base_uri() const
     return m_uri;
 }
 
+web_proxy _http_client_communicator::proxy() const
+{
+    return web_proxy(web_proxy::use_default);
+}
+
 _http_client_communicator::_http_client_communicator(http::uri&& address, http_client_config&& client_config)
     : m_uri(std::move(address)), m_client_config(std::move(client_config)), m_opened(false), m_scheduled(0)
 {
@@ -379,6 +384,11 @@ const http_client_config & http_client::client_config() const
 const uri & http_client::base_uri() const
 {
     return m_pipeline->m_last_stage->base_uri();
+}
+
+web_proxy http_client::proxy() const
+{
+    return m_pipeline->m_last_stage->proxy();
 }
 
 // Macros to help build string at compile time and avoid overhead.
