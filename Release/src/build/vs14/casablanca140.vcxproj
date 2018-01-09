@@ -43,7 +43,7 @@
   </ItemGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <PreprocessorDefinitions>_ASYNCRT_EXPORT;_PPLX_EXPORT;WIN32;_MBCS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_ASYNCRT_EXPORT;_PPLX_EXPORT;WIN32;_MBCS;_USRDLL;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(CasablancaIncludeDir);$(CasablancaSrcDir)\pch;$(WebsocketppIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
@@ -61,7 +61,7 @@
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4503;4592;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Winhttp.lib;httpapi.lib;bcrypt.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Secur32.lib;Winhttp.lib;httpapi.lib;bcrypt.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration Condition="'$(Configuration)'=='Release'">UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
