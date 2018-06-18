@@ -142,6 +142,7 @@ protected:
 
     virtual bool CompleteComment(Token &token);
     virtual bool CompleteStringLiteral(Token &token);
+    int convert_unicode_to_code_point(Token &token);
     bool handle_unescape_char(Token &token);
 
 private:
@@ -703,6 +704,36 @@ void convert_append_unicode_code_unit(JSON_Parser<char>::Token &token, utf16char
 }
 
 template <typename CharType>
+int JSON_Parser<CharType>::convert_unicode_to_code_point(Token &token)
+{
+    // A four-hexdigit Unicode character.
+    // Transform into a 16 bit code point.
+    int decoded = 0;
+    for (int i = 0; i < 4; ++i)
+    {
+        auto ch = NextCharacter();
+        int ch_int = static_cast<int>(ch);
+        if (ch_int < 0 || ch_int > 127)
+            return -1;
+#ifdef _WIN32
+        const int isxdigitResult = _isxdigit_l(ch_int, utility::details::scoped_c_thread_locale::c_locale());
+#else
+        const int isxdigitResult = isxdigit(ch_int);
+#endif
+        if (!isxdigitResult)
+            return -1;
+
+        int val = _hexval[static_cast<size_t>(ch_int)];
+
+        _ASSERTE(val != -1);
+
+        // Add the input char to the decoded number
+        decoded |= (val << (4 * (3 - i)));
+    }
+    return decoded;
+}
+
+template <typename CharType>
 inline bool JSON_Parser<CharType>::handle_unescape_char(Token &token)
 {
     token.has_unescape_symbol = true;
@@ -738,32 +769,28 @@ inline bool JSON_Parser<CharType>::handle_unescape_char(Token &token)
             return true;
         case 'u':
         {
-            // A four-hexdigit Unicode character.
-            // Transform into a 16 bit code point.
-            int decoded = 0;
-            for (int i = 0; i < 4; ++i)
+            int decoded = convert_unicode_to_code_point(token);
+            if (decoded == -1)
             {
-                ch = NextCharacter();
-                int ch_int = static_cast<int>(ch);
-                if (ch_int < 0 || ch_int > 127)
-                    return false;
-#ifdef _WIN32
-                const int isxdigitResult = _isxdigit_l(ch_int, utility::details::scoped_c_thread_locale::c_locale());
-#else
-                const int isxdigitResult = isxdigit(ch_int);
-#endif
-                if (!isxdigitResult)
-                    return false;
-
-                int val = _hexval[static_cast<size_t>(ch_int)];
-                _ASSERTE(val != -1);
-
-                // Add the input char to the decoded number
-                decoded |= (val << (4 * (3 - i)));
+                return false;
             }
 
-            // Construct the character based on the decoded number
-			convert_append_unicode_code_unit(token, static_cast<utf16char>(decoded));
+            // handle multi-block characters that start with a high-surrogate
+            if (decoded > 55296 && decoded < 56319)
+            {
+                // skip escape character
+                NextCharacter(); NextCharacter();
+                int decoded2 = convert_unicode_to_code_point(token);
+
+                utf16string compoundUTF16 = { static_cast<utf16char>(decoded),
+                                              static_cast<utf16char>(decoded2) };
+                token.string_val.append(::utility::conversions::utf16_to_utf8(compoundUTF16));
+            }
+            else
+            {
+                // Construct the character based on the decoded number
+                convert_append_unicode_code_unit(token, static_cast<utf16char>(decoded));
+            }
 
             return true;
         }
