@@ -142,7 +142,7 @@ protected:
 
     virtual bool CompleteComment(Token &token);
     virtual bool CompleteStringLiteral(Token &token);
-    int convert_unicode_to_code_point(Token &token);
+    int convert_unicode_to_code_point();
     bool handle_unescape_char(Token &token);
 
 private:
@@ -712,7 +712,7 @@ void convert_append_unicode_code_unit(JSON_Parser<char>::Token &token, utf16char
 }
 
 template <typename CharType>
-int JSON_Parser<CharType>::convert_unicode_to_code_point(Token &token)
+int JSON_Parser<CharType>::convert_unicode_to_code_point()
 {
     // A four-hexdigit Unicode character.
     // Transform into a 16 bit code point.
@@ -777,7 +777,7 @@ inline bool JSON_Parser<CharType>::handle_unescape_char(Token &token)
             return true;
         case 'u':
         {
-            int decoded = convert_unicode_to_code_point(token);
+            int decoded = convert_unicode_to_code_point();
             if (decoded == -1)
             {
                 return false;
@@ -788,7 +788,7 @@ inline bool JSON_Parser<CharType>::handle_unescape_char(Token &token)
             {
                 // skip escape character
                 NextCharacter(); NextCharacter();
-                int decoded2 = convert_unicode_to_code_point(token);
+                int decoded2 = convert_unicode_to_code_point();
 
                 utf16string compoundUTF16 = { static_cast<utf16char>(decoded),
                                               static_cast<utf16char>(decoded2) };
