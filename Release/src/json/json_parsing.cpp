@@ -693,6 +693,14 @@ bool JSON_StringParser<CharType>::CompleteComment(typename JSON_Parser<CharType>
     return true;
 }
 
+void convert_append_unicode_code_unit(JSON_Parser<wchar_t>::Token &token, utf16string value)
+{
+    token.string_val.append(value);
+}
+void convert_append_unicode_code_unit(JSON_Parser<char>::Token &token, utf16string value)
+{
+    token.string_val.append(::utility::conversions::utf16_to_utf8(value));
+}
 void convert_append_unicode_code_unit(JSON_Parser<wchar_t>::Token &token, utf16char value)
 {
     token.string_val.push_back(value);
@@ -784,7 +792,7 @@ inline bool JSON_Parser<CharType>::handle_unescape_char(Token &token)
 
                 utf16string compoundUTF16 = { static_cast<utf16char>(decoded),
                                               static_cast<utf16char>(decoded2) };
-                token.string_val.append(::utility::conversions::utf16_to_utf8(compoundUTF16));
+                convert_append_unicode_code_unit(token, compoundUTF16);
             }
             else
             {
