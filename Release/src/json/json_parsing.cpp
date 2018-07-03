@@ -741,6 +741,9 @@ int JSON_Parser<CharType>::convert_unicode_to_code_point()
     return decoded;
 }
 
+#define H_SURROGATE_START 0xD800
+#define H_SURROGATE_END 0xDBFF
+
 template <typename CharType>
 inline bool JSON_Parser<CharType>::handle_unescape_char(Token &token)
 {
@@ -784,7 +787,7 @@ inline bool JSON_Parser<CharType>::handle_unescape_char(Token &token)
             }
 
             // handle multi-block characters that start with a high-surrogate
-            if (decoded > 0xD800 && decoded < 0xDBFF)
+            if (decoded > H_SURROGATE_START && decoded < H_SURROGATE_END)
             {
                 // skip escape character
                 NextCharacter(); NextCharacter();
