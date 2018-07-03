@@ -693,15 +693,15 @@ bool JSON_StringParser<CharType>::CompleteComment(typename JSON_Parser<CharType>
     return true;
 }
 
-void convert_append_unicode_code_unit(JSON_Parser<wchar_t>::Token &token, utf16string value)
+void convert_append_unicode_code_unit(JSON_Parser<utf16char>::Token &token, utf16string value)
 {
-    token.string_val.append(reinterpret_cast<const wchar_t *>(value.c_str()));
+    token.string_val.append(value);
 }
 void convert_append_unicode_code_unit(JSON_Parser<char>::Token &token, utf16string value)
 {
     token.string_val.append(::utility::conversions::utf16_to_utf8(value));
 }
-void convert_append_unicode_code_unit(JSON_Parser<wchar_t>::Token &token, utf16char value)
+void convert_append_unicode_code_unit(JSON_Parser<utf16char>::Token &token, utf16char value)
 {
     token.string_val.push_back(value);
 }
@@ -789,7 +789,7 @@ inline bool JSON_Parser<CharType>::handle_unescape_char(Token &token)
             // handle multi-block characters that start with a high-surrogate
             if (decoded > H_SURROGATE_START && decoded < H_SURROGATE_END)
             {
-                // skip escape character
+                // skip escape character '\u'
                 NextCharacter(); NextCharacter();
                 int decoded2 = convert_unicode_to_code_point();
 
