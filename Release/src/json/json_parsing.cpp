@@ -790,8 +790,15 @@ inline bool JSON_Parser<CharType>::handle_unescape_char(Token &token)
             if (decoded > H_SURROGATE_START && decoded < H_SURROGATE_END)
             {
                 // skip escape character '\u'
-                NextCharacter(); NextCharacter();
+                if (NextCharacter() != '\\' || NextCharacter() != 'u') {
+                    return false;
+                }
                 int decoded2 = convert_unicode_to_code_point();
+
+                if (decoded2 == -1)
+                {
+                    return false;
+                }
 
                 utf16string compoundUTF16 = { static_cast<utf16char>(decoded),
                                               static_cast<utf16char>(decoded2) };
