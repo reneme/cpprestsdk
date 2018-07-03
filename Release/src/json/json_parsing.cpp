@@ -803,12 +803,12 @@ inline bool JSON_Parser<CharType>::handle_unescape_char(Token &token)
                 utf16string compoundUTF16 = { static_cast<utf16char>(decoded),
                                               static_cast<utf16char>(decoded2) };
                 convert_append_unicode_code_unit(token, compoundUTF16);
+
+                return true;
             }
-            else
-            {
-                // Construct the character based on the decoded number
-                convert_append_unicode_code_unit(token, static_cast<utf16char>(decoded));
-            }
+
+            // Construct the character based on the decoded number
+            convert_append_unicode_code_unit(token, static_cast<utf16char>(decoded));
 
             return true;
         }
