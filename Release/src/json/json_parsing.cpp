@@ -784,7 +784,7 @@ inline bool JSON_Parser<CharType>::handle_unescape_char(Token &token)
             }
 
             // handle multi-block characters that start with a high-surrogate
-            if (decoded > 55296 && decoded < 56319)
+            if (decoded > 0xD800 && decoded < 0xDBFF)
             {
                 // skip escape character
                 NextCharacter(); NextCharacter();
