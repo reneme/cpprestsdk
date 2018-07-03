@@ -695,7 +695,7 @@ bool JSON_StringParser<CharType>::CompleteComment(typename JSON_Parser<CharType>
 
 void convert_append_unicode_code_unit(JSON_Parser<wchar_t>::Token &token, utf16string value)
 {
-    token.string_val.append(value);
+    token.string_val.append(reinterpret_cast<const wchar_t *>(value.c_str()));
 }
 void convert_append_unicode_code_unit(JSON_Parser<char>::Token &token, utf16string value)
 {
