@@ -693,7 +693,7 @@ bool JSON_StringParser<CharType>::CompleteComment(typename JSON_Parser<CharType>
     return true;
 }
 
-void convert_append_unicode_code_unit(JSON_Parser<wchar_t>::Token &token, utf16string value)
+void convert_append_unicode_code_unit(JSON_Parser<utf16char>::Token &token, utf16string value)
 {
     token.string_val.append(value);
 }
@@ -701,7 +701,7 @@ void convert_append_unicode_code_unit(JSON_Parser<char>::Token &token, utf16stri
 {
     token.string_val.append(::utility::conversions::utf16_to_utf8(value));
 }
-void convert_append_unicode_code_unit(JSON_Parser<wchar_t>::Token &token, utf16char value)
+void convert_append_unicode_code_unit(JSON_Parser<utf16char>::Token &token, utf16char value)
 {
     token.string_val.push_back(value);
 }
@@ -740,6 +740,9 @@ int JSON_Parser<CharType>::convert_unicode_to_code_point()
     }
     return decoded;
 }
+
+#define H_SURROGATE_START 0xD800
+#define H_SURROGATE_END 0xDBFF
 
 template <typename CharType>
 inline bool JSON_Parser<CharType>::handle_unescape_char(Token &token)
@@ -784,21 +787,28 @@ inline bool JSON_Parser<CharType>::handle_unescape_char(Token &token)
             }
 
             // handle multi-block characters that start with a high-surrogate
-            if (decoded > 55296 && decoded < 56319)
+            if (decoded > H_SURROGATE_START && decoded < H_SURROGATE_END)
             {
-                // skip escape character
-                NextCharacter(); NextCharacter();
+                // skip escape character '\u'
+                if (NextCharacter() != '\\' || NextCharacter() != 'u') {
+                    return false;
+                }
                 int decoded2 = convert_unicode_to_code_point();
+
+                if (decoded2 == -1)
+                {
+                    return false;
+                }
 
                 utf16string compoundUTF16 = { static_cast<utf16char>(decoded),
                                               static_cast<utf16char>(decoded2) };
                 convert_append_unicode_code_unit(token, compoundUTF16);
+
+                return true;
             }
-            else
-            {
-                // Construct the character based on the decoded number
-                convert_append_unicode_code_unit(token, static_cast<utf16char>(decoded));
-            }
+
+            // Construct the character based on the decoded number
+            convert_append_unicode_code_unit(token, static_cast<utf16char>(decoded));
 
             return true;
         }
