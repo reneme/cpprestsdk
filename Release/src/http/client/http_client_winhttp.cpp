@@ -636,13 +636,14 @@ protected:
                 m_uri.to_string().c_str(),
                 &autoproxy_options,
                 &info );
-            if(result)
+            if(result && info.dwAccessType != WINHTTP_ACCESS_TYPE_NO_PROXY)
             {
                 proxy_info_required = true;
             }
             else
             {
                 // Failure to download the auto-configuration script is not fatal. Fall back to the default proxy.
+                // Also use the default proxy if the script replied with 'no proxy'
             }
         }
 
